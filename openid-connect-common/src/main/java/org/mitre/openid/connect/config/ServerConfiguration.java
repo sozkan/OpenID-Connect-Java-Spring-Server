@@ -38,6 +38,11 @@ public class ServerConfiguration {
 	 *
     issuer
         REQUIRED. URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier.
+    skipIssuerCheckDuringIdTokenValidation
+        NON-STANDARD.
+        When true, issuer value in the id token will NOT be compared with the expected issuer value.
+        This is required for Microsoft Azure compatibility.
+        Set in your server ServerConfigurationService implementation.
     authorization_endpoint
         OPTIONAL. URL of the OP's Authentication and Authorization Endpoint [OpenID.Messages].
     token_endpoint
@@ -168,6 +173,8 @@ public class ServerConfiguration {
 
 	private String issuer;
 
+	private boolean skipIssuerCheckDuringIdTokenValidation;
+
 	private String jwksUri;
 
 	private String userInfoUri;
@@ -267,6 +274,18 @@ public class ServerConfiguration {
 	 */
 	public void setIssuer(String issuer) {
 		this.issuer = issuer;
+	}
+	/**
+	 * @return true when issuer validation is disabled
+	 */
+	public boolean isSkipIssuerCheckDuringIdTokenValidation() {
+		return skipIssuerCheckDuringIdTokenValidation;
+	}
+	/**
+	 * @param skipIssuerCheckDuringIdTokenValidation disables issuer validation
+	 */
+	public void setSkipIssuerCheckDuringIdTokenValidation(boolean skipIssuerCheckDuringIdTokenValidation) {
+		this.skipIssuerCheckDuringIdTokenValidation = skipIssuerCheckDuringIdTokenValidation;
 	}
 	/**
 	 * @return the jwksUri
@@ -737,6 +756,7 @@ public class ServerConfiguration {
 				+ ((introspectionEndpointUri == null) ? 0
 						: introspectionEndpointUri.hashCode());
 		result = prime * result + ((issuer == null) ? 0 : issuer.hashCode());
+		result = prime * result + (skipIssuerCheckDuringIdTokenValidation ? 1 : 0);
 		result = prime * result + ((jwksUri == null) ? 0 : jwksUri.hashCode());
 		result = prime * result
 				+ ((opPolicyUri == null) ? 0 : opPolicyUri.hashCode());
@@ -940,6 +960,9 @@ public class ServerConfiguration {
 				return false;
 			}
 		} else if (!issuer.equals(other.issuer)) {
+			return false;
+		}
+		if (skipIssuerCheckDuringIdTokenValidation != other.skipIssuerCheckDuringIdTokenValidation) {
 			return false;
 		}
 		if (jwksUri == null) {

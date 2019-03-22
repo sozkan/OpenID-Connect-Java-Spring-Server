@@ -556,7 +556,12 @@ public class OIDCAuthenticationFilter extends AbstractAuthenticationProcessingFi
 				if (idClaims.getIssuer() == null) {
 					throw new AuthenticationServiceException("Id Token Issuer is null");
 				} else if (!idClaims.getIssuer().equals(serverConfig.getIssuer())){
-					throw new AuthenticationServiceException("Issuers do not match, expected " + serverConfig.getIssuer() + " got " + idClaims.getIssuer());
+					if(serverConfig.isSkipIssuerCheckDuringIdTokenValidation()) {
+						logger.warn("Issuer (" +idClaims.getIssuer()+ ") does not match the expected issuer (" +serverConfig.getIssuer()+ ") "
+							+ "but issuer validation is disabled for this provider");
+					} else {
+						throw new AuthenticationServiceException("Issuers do not match, expected " + serverConfig.getIssuer() + " got " + idClaims.getIssuer());
+					}
 				}
 
 				// check expiration
